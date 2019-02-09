@@ -26,8 +26,6 @@ public class Utils {
     private static final String LOG_TAG = Utils.class.getSimpleName();
     
     /** json keys
-    public Recipe(Integer id, String name, ArrayList<Ingredient> ingredients, 
-    ArrayList<RecipeStep> recipeKEY_STEPS, Integer servings, String image)    
      */
     
     private static String KEY_RECIPE_ID = "id";

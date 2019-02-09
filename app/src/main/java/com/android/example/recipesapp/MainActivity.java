@@ -1,7 +1,21 @@
  package com.android.example.recipesapp;
 
-import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+ import android.content.Context;
+ import android.net.ConnectivityManager;
+ import android.net.NetworkInfo;
+ import android.net.Uri;
+ import android.os.Bundle;
+ import android.support.annotation.NonNull;
+ import android.support.annotation.Nullable;
+ import android.support.v4.app.LoaderManager;
+ import android.support.v4.content.Loader;
+ import android.support.v7.app.AppCompatActivity;
+ import android.widget.Toast;
+
+ import com.android.example.recipesapp.model.Recipe;
+ import com.android.example.recipesapp.utils.RecipeLoader;
+
+ import java.util.ArrayList;
 
 /* Make A Baking App (Project 4-AND)
 
@@ -54,11 +68,71 @@ implementing background thread call to recipe json data.
 */
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<ArrayList<Recipe>> {
+
+    private static final String RECIPE_URL =
+            "https://d17h27t6h515a5.cloudfront.net/topher/2017/May/59121517_baking/baking.json";
+    private static final int RECIPE_LOADER_ID = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Get a reference to the ConnectivityManager to check state of network connectivity
+        ConnectivityManager connMgr = (ConnectivityManager)
+                getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        // Get details on the currently active default data network
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+
+        // If there is a network connection, fetch data
+        if (networkInfo != null && networkInfo.isConnected()) {
+            LoaderManager loaderManager = getSupportLoaderManager();
+            loaderManager.initLoader(RECIPE_LOADER_ID, null, this);
+        } else {
+            Toast.makeText(this, "No internet connection found.\\nPlease try again later.",
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @NonNull
+    @Override
+    public Loader<ArrayList<Recipe>> onCreateLoader(int i, @Nullable Bundle bundle) {
+        // Get a reference to the ConnectivityManager to check state of network connectivity
+        ConnectivityManager connMgr = (ConnectivityManager)
+                getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        // Get details on the currently active default data network
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+
+        if (networkInfo != null && networkInfo.isConnected()) {
+            // Build Uri
+
+            Uri baseUri = Uri.parse(RECIPE_URL);
+
+            return new RecipeLoader(getApplicationContext(), baseUri.toString());
+        } else {
+            // Otherwise, display error
+            // Update empty state with no connection error message
+            Toast.makeText(this, "No internet connection found.\\nPlease try again later.",
+                    Toast.LENGTH_SHORT).show();
+            return null;
+        }
+    }
+
+    @Override
+    public void onLoadFinished(@NonNull Loader<ArrayList<Recipe>> loader, ArrayList<Recipe> recipes) {
+    // load data into recycler view adapter, etc - TODO implement Master/Detail flow
+        Toast.makeText(this, "Load Finished",
+                Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onLoaderReset(@NonNull Loader<ArrayList<Recipe>> loader) {
+        // clear recycler view adapter, etc - TODO implement Master/Detail flow
+        Toast.makeText(this, "Reset Loader",
+                Toast.LENGTH_SHORT).show();
+
     }
 }
